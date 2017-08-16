@@ -33,11 +33,11 @@ def main(argv):
    try:
       opts, args = getopt.getopt(argv,"hi:o:d:")
    except getopt.GetoptError:
-      print 'RFM-analysis.py -i <orders.csv> -o <rfm-table.csv> -d <yyyy-mm-dd>'
+      print('RFM-analysis.py -i <orders.csv> -o <rfm-table.csv> -d <yyyy-mm-dd>')
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print 'RFM-analysis.py -i <orders.csv> -o <rfm-table.csv> -d "yyyy-mm-dd"'
+         print('RFM-analysis.py -i <orders.csv> -o <rfm-table.csv> -d "yyyy-mm-dd"')
          sys.exit()
       elif opt in ("-i", "--ifile"):
          inputfile = arg
@@ -50,10 +50,10 @@ def main(argv):
 
 
 def rfm(inputfile, outputfile, inputdate):
-   print " "
-   print "---------------------------------------------"
-   print " Calculating RFM segmentation for " + inputdate
-   print "---------------------------------------------"
+   print(" ")
+   print("---------------------------------------------")
+   print(" Calculating RFM segmentation for " + inputdate)
+   print("---------------------------------------------")
 
    NOW = datetime.strptime(inputdate, "%Y-%m-%d")
 
@@ -73,6 +73,7 @@ def rfm(inputfile, outputfile, inputdate):
 
    quantiles = rfmTable.quantile(q=[0.25,0.5,0.75])
    quantiles = quantiles.to_dict()
+   print(quantiles)
 
    rfmSegmentation = rfmTable
 
@@ -82,11 +83,22 @@ def rfm(inputfile, outputfile, inputdate):
 
    rfmSegmentation['RFMClass'] = rfmSegmentation.R_Quartile.map(str) + rfmSegmentation.F_Quartile.map(str) + rfmSegmentation.M_Quartile.map(str)
 
+   rfmSegmentation = rfmSegmentation.reset_index()
+   rfmSegmentation['Percents'] = pd.Series([r'25%', r'50%', r'75%'])
+   rfmSegmentation['Quartile - monetary_value'] = pd.Series([quantiles['monetary_value'][0.25], quantiles['monetary_value'][0.5], quantiles['monetary_value'][0.75]])
+   rfmSegmentation['Quartile - frequency'] = pd.Series([quantiles['frequency'][0.25], quantiles['frequency'][0.5], quantiles['frequency'][0.75]])
+   rfmSegmentation['Quartile - recency'] = pd.Series([quantiles['recency'][0.25], quantiles['recency'][0.5], quantiles['recency'][0.75]])
+   
+   print(rfmSegmentation)
+   #rfmSegmentation.apply(lambda col: col.drop_duplicates().reset_index(drop=True))
+
+
+
    rfmSegmentation.to_csv(outputfile, sep=',')
 
-   print " "
-   print " DONE! Check %s" % (outputfile)
-   print " "
+   print(" ")
+   print(" DONE! Check %s" % (outputfile))
+   print(" ")
 
 # We create two classes for the RFM segmentation since, being high recency is bad, while high frequency and monetary value is good. 
 # Arguments (x = value, p = recency, monetary_value, frequency, k = quartiles dict)
@@ -110,7 +122,6 @@ def FMClass(x,p,d):
         return 2
     else:
         return 1
-
 
 
 if __name__ == "__main__":
