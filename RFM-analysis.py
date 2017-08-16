@@ -89,9 +89,6 @@ def rfm(inputfile, outputfile, inputdate):
    rfmSegmentation['Quartile - frequency'] = pd.Series([quantiles['frequency'][0.25], quantiles['frequency'][0.5], quantiles['frequency'][0.75]])
    rfmSegmentation['Quartile - recency'] = pd.Series([quantiles['recency'][0.25], quantiles['recency'][0.5], quantiles['recency'][0.75]])
    
-   print(rfmSegmentation)
-   #rfmSegmentation.apply(lambda col: col.drop_duplicates().reset_index(drop=True))
-
 
 
    rfmSegmentation.to_csv(outputfile, sep=',')
